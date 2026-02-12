@@ -593,18 +593,25 @@ nano docker-compose.yml
 services:
   n8n:
     image: n8nio/n8n:latest
-    container_name: n8n
-    restart: unless-stopped
+    restart: always
+
+    # Only local access (CyberPanel will proxy)
     ports:
       - "127.0.0.1:5678:5678"
     environment:
+      # === PUBLIC URL SETTINGS (HTTPS) ===
       - N8N_HOST=n8n.elgenix.com
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
       - WEBHOOK_URL=https://n8n.elgenix.com/
       - N8N_EDITOR_BASE_URL=https://n8n.elgenix.com/
+
+      # CRITICAL behind reverse proxy
       - N8N_PROXY_HOPS=1
+
+      # === SECURITY / COOKIES ===
       - N8N_SECURE_COOKIE=true
+
       - GENERIC_TIMEZONE=Europe/Berlin
     volumes:
       - /root/.n8n:/home/node/.n8n
