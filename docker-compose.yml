@@ -1,27 +1,49 @@
 # 1. Create directory
-mkdir ~/n8n-docker && cd ~/n8n-docker
+# mkdir ~/n8n-docker && cd ~/n8n-docker
 
 # 2. Create docker-compose.yml
-cat > docker-compose.yml <<EOF
+# cat > docker-compose.yml <<EOF
+
 version: '3.8'
+# Docker Compose file format version (3.8 is stable and widely compatible)
+
+
 services:
   n8n:
+    # "n8n" is just a name you give to this container (you could call it anything)
+    
     image: n8nio/n8n
+    # Downloads the official n8n Docker image from Docker Hub
+    
     restart: always
+    # If container crashes or server reboots, Docker automatically restarts n8n
+    
     ports:
-      - "127.0.0.1:5678:5678"
+      - "5678:5678"
+    # Maps port 5678 on your VPS to port 5678 inside the container
+    # Format: "HOST_PORT:CONTAINER_PORT"
+    # This lets you access n8n at http://YOUR_IP:5678
+    
     environment:
-      - N8N_HOST=n8n.elgenix.com
+      # These are settings that n8n reads when it starts
+      
+      - N8N_HOST=your-domain.com
+      # The domain name n8n will use (change to elgenix.com)
+      
       - N8N_PORT=5678
+      # The port n8n listens on inside the container
+      
       - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://n8n.elgenix.com/
+      # Whether to use http or https (set to http for now, https after SSL setup)
+      
+      - WEBHOOK_URL=https://your-domain.com/
+      # The public URL where external services can send data to n8n
+      # Important for receiving webhooks from job sites, WhatsApp, etc.
+    
     volumes:
       - ~/.n8n:/home/node/.n8n
-EOF
-
-# 3. Start n8n
-docker-compose up -d
-
-# 4. Check if running
-docker-compose ps
-docker-compose logs -f n8n
+      # Maps a folder on your VPS to a folder inside the container
+      # Format: "VPS_PATH:CONTAINER_PATH"
+      # ~/.n8n = your VPS (stores workflows, credentials, settings)
+      # /home/node/.n8n = inside container (where n8n expects to find data)
+      # This ensures your data survives even if you delete/recreate the container
