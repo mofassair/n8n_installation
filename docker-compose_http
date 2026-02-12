@@ -1,0 +1,32 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+
+    # Expose to the internet (testing only)
+    ports:
+      - "5678:5678"
+
+    environment:
+      # === PUBLIC URL SETTINGS (HTTP) ===
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://${N8N_HOST}:5678/
+      # Optional but nice to keep consistent:
+      - N8N_EDITOR_BASE_URL=http://${N8N_HOST}:5678/
+
+      # === SECURITY / COOKIES ===
+      # REQUIRED for HTTP access
+      - N8N_SECURE_COOKIE=false
+
+      # === TIMEZONE ===
+      - GENERIC_TIMEZONE=Europe/Berlin
+
+      # (Optional) Reduce noisy telemetry/diagnostics if you want:
+      # - N8N_DIAGNOSTICS_ENABLED=false
+
+    volumes:
+      # Persistent data (workflows, credentials, DB)
+      - ${N8N_DATA_DIR}:/home/node/.n8n
