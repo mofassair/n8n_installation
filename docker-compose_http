@@ -29,4 +29,4 @@ services:
 
     volumes:
       # Persistent data (workflows, credentials, DB)
-      - ${N8N_DATA_DIR}:/home/node/.n8n
+      - /root/.n8n:/home/node/.n8n
