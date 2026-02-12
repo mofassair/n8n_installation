@@ -1,0 +1,27 @@
+# 1. Create directory
+mkdir ~/n8n-docker && cd ~/n8n-docker
+
+# 2. Create docker-compose.yml
+cat > docker-compose.yml <<EOF
+version: '3.8'
+services:
+  n8n:
+    image: n8nio/n8n
+    restart: always
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      - N8N_HOST=n8n.elgenix.com
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.elgenix.com/
+    volumes:
+      - ~/.n8n:/home/node/.n8n
+EOF
+
+# 3. Start n8n
+docker-compose up -d
+
+# 4. Check if running
+docker-compose ps
+docker-compose logs -f n8n
