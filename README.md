@@ -3,53 +3,6 @@
 
 ---
 
-## 🚀 Quick Start (5 Minutes)
-
-**Want to start NOW without DNS/SSL setup?**
-
-```bash
-# 1. Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
-
-# 2. Create n8n directory
-mkdir ~/n8n-docker && cd ~/n8n-docker
-
-# 3. Create config file
-cat > docker-compose.yml <<EOF
-version: '3.8'
-services:
-  n8n:
-    image: n8nio/n8n
-    restart: always
-    ports:
-      - "5678:5678"
-    environment:
-      - N8N_HOST=109.123.254.58
-      - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://109.123.254.58:5678/
-    volumes:
-      - ~/.n8n:/home/node/.n8n
-EOF
-
-# 4. Open firewall (CyberPanel GUI or firewalld)
-sudo firewall-cmd --zone=public --permanent --add-port=5678/tcp
-sudo firewall-cmd --reload
-
-or 
-
-4. open filewall via command
-sudo ufw allow 5678/tcp
-
-# 5. Start n8n
-docker-compose up -d
-
-# 6. Access at: http://109.123.254.58:5678
-```
-
-**Done!** 🎉 Now jump to [Section 10: First Login](#10-first-login--configuration)
-
-**Later upgrade to SSL?** See [Migration Guide](#how-to-migrate-from-path-a-to-path-b-later)
-
 ---
 
 ## 📊 Path A vs Path B: Which Should You Choose?
@@ -252,6 +205,8 @@ ssh root@109.123.254.58
 ssh yourusername@109.123.254.58
 ```
 
+
+
 ---
 
 ## 4. Setting Up n8n.elgenix.com Subdomain
@@ -327,13 +282,23 @@ Docker packages n8n and all its dependencies into an isolated container, making 
 
 ### Installation Commands
 
+## ✅ Check system basics
+```bash
+whoami
+uname -a
+df -h
+free -h
+```
+
+Comment: If disk is nearly full or RAM < 2GB, Docker containers may crash.
+
 ```bash
 # 1. Update system
 sudo apt update && sudo apt upgrade -y
 
 # 2. Install Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+sh get-docker.sh
 
 # 3. Install Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -345,7 +310,6 @@ docker-compose --version
 ```
 
 **Note:** If you do not add a user to the `docker` group, run Docker commands with `sudo` (recommended on a single-user VPS).
-```
 
 **Expected output:**
 ```
@@ -398,9 +362,8 @@ services:
   
   n8n:
     # "n8n" is just a name for this container
-    # You could call it "automation" or "workflow-engine"
     
-    image: n8nio/n8n
+    image: n8nio/n8n:latest
     # This downloads the official n8n container from Docker Hub
     # Like downloading an app from the App Store
     
@@ -409,17 +372,12 @@ services:
     # Ensures 24/7 availability
     
     ports:
-      - "127.0.0.1:5678:5678"
-    # Port mapping format: "HOST:CONTAINER"
-    # 127.0.0.1:5678 = Only accessible from localhost (secure)
-    # :5678 = n8n runs on port 5678 inside the container
-    # 
-    # WHY 127.0.0.1? 
-    # - CyberPanel's reverse proxy will handle external access
-    # - Direct external access on 5678 would bypass CyberPanel security
+      - "5678:5678"
+      # Expose directly to the internet (testing)
     
     environment:
       # These are like "settings" that n8n reads when it starts
+      # For direct IP access
       
       - N8N_HOST=n8n.elgenix.com
       # The domain name n8n will respond to
@@ -516,22 +474,31 @@ nano docker-compose.yml
 **Paste this simple configuration:**
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   n8n:
-    image: n8nio/n8n
+    image: n8nio/n8n:latest
     restart: always
+
+    # Expose directly to the internet (testing)
     ports:
-      - "5678:5678"  # Exposed to internet directly
+      - "5678:5678"
+
     environment:
-      - N8N_HOST=109.123.254.58
+      # For direct IP access
+      - N8N_HOST=YOUR_VPS_IP
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://109.123.254.58:5678/
-      - GENERIC_TIMEZONE=Asia/Kolkata
+      - WEBHOOK_URL=http://YOUR_VPS_IP:5678/
+
+      # Use your actual timezone
+      - GENERIC_TIMEZONE=Europe/Berlin
+
     volumes:
+      # Persistent data
       - ~/.n8n:/home/node/.n8n
+
 ```
 
 **Save and exit:**
@@ -629,23 +596,35 @@ nano docker-compose.yml
 **Paste this production configuration:**
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   n8n:
-    image: n8nio/n8n
+    image: n8nio/n8n:latest
     restart: always
+
+    # Only local access (CyberPanel will proxy)
     ports:
-      - "127.0.0.1:5678:5678"  # Only accessible via localhost (reverse proxy)
+      - "127.0.0.1:5678:5678"
+
     environment:
       - N8N_HOST=n8n.elgenix.com
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
+
+      # CRITICAL: correct public webhook/editor URLs
       - WEBHOOK_URL=https://n8n.elgenix.com/
       - N8N_EDITOR_BASE_URL=https://n8n.elgenix.com/
-      - GENERIC_TIMEZONE=Asia/Kolkata
+
+      # CRITICAL behind reverse proxy
+      - N8N_PROXY_HOPS=1
+      - N8N_SECURE_COOKIE=true
+
+      - GENERIC_TIMEZONE=Europe/Berlin
+
     volumes:
       - ~/.n8n:/home/node/.n8n
+
 ```
 
 **Save and exit:**
@@ -850,124 +829,125 @@ Now we connect CyberPanel to n8n so `https://n8n.elgenix.com` → `http://127.0.
 
 #### Step 2: Configure Rewrite Rules
 
-1. **Go to**: "Rewrite Rules" (in left sidebar)
-2. **Click**: "Save & Edit"
-3. **Replace** the entire content with:
+Find vHost Conf / Context / Proxy (wording varies slightly by version)
 
-```apache
-<VirtualHost *:443>
-    ServerName n8n.elgenix.com
-    ServerAdmin admin@elgenix.com
-    
-    SSLEngine on
-    SSLCertificateFile /etc/letsencrypt/live/n8n.elgenix.com/cert.pem
-    SSLCertificateKeyFile /etc/letsencrypt/live/n8n.elgenix.com/privkey.pem
-    SSLCertificateChainFile /etc/letsencrypt/live/n8n.elgenix.com/chain.pem
-    
-    ProxyPreserveHost On
-    ProxyRequests Off
-    
-    # WebSocket support (critical for n8n)
-    RewriteEngine On
-    RewriteCond %{HTTP:Upgrade} websocket [NC]
-    RewriteCond %{HTTP:Connection} upgrade [NC]
-    RewriteRule .* ws://127.0.0.1:5678%{REQUEST_URI} [P]
-    
-    # Regular HTTP proxy
-    ProxyPass / http://127.0.0.1:5678/
-    ProxyPassReverse / http://127.0.0.1:5678/
-    
-    # Headers for proper forwarding
-    RequestHeader set X-Forwarded-Proto "https"
-    RequestHeader set X-Forwarded-Port "443"
-</VirtualHost>
+Create a Proxy Context:
 
-<VirtualHost *:80>
-    ServerName n8n.elgenix.com
-    
-    # Redirect all HTTP to HTTPS
-    RewriteEngine On
-    RewriteCond %{HTTPS} off
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-</VirtualHost>
-```
+- Type: Proxy
+- URI: /
+- Address: http://127.0.0.1:5678
+- WebSocket: ON/Enabled
 
-4. **Click "Save"**
-5. **Restart OpenLiteSpeed**:
-   ```bash
-   sudo systemctl restart lsws
-   ```
+Save.
 
-### Method 2: Direct Configuration File Edit
-
-If CyberPanel GUI doesn't work:
+#### Restart OpenLiteSpeed:
+CyberPanel → Server → LiteSpeed Status → Restart
+(or SSH)
 
 ```bash
-# Find the config file
-cd /usr/local/lsws/conf/vhosts/n8n.elgenix.com
-
-# Edit vhost config
-sudo nano vhost.conf
-
-# Add the proxy configuration (same as above)
-
-# Restart web server
-sudo systemctl restart lsws
+systemctl restart lsws
 ```
 
-### Enable Apache Modules (if needed)
 
-```bash
-# Enable proxy modules
-sudo a2enmod proxy
-sudo a2enmod proxy_http
-sudo a2enmod proxy_wstunnel
-sudo a2enmod rewrite
-sudo a2enmod headers
-
-# Restart Apache (if using Apache instead of LiteSpeed)
-sudo systemctl restart apache2
-```
-
----
-
-## 9. SSL Certificate Setup
-
-**⚠️ Note: This section is ONLY needed for Path B (production setup with SSL + domain).**
-
-**If you're using Path A (direct access via IP:5678), you can skip this section.**
-
----
-
-### Using CyberPanel's Built-in SSL (Easiest)
-
-1. **In CyberPanel**: Go to SSL → Issue SSL
-2. **Select Website**: `n8n.elgenix.com`
-3. **Click**: "Issue SSL"
-4. **Wait**: 30-60 seconds
-
-CyberPanel will automatically:
-- Generate Let's Encrypt certificate
-- Configure SSL in web server
-- Set up auto-renewal
-
-### Verify SSL is Working
-
-```bash
-# Test from command line
+✅ Test after proxy
 curl -I https://n8n.elgenix.com
 
-# Should return:
-# HTTP/2 200
-# server: LiteSpeed
+
+Then open browser:
+```bash
+https://n8n.elgenix.com
 ```
 
-Visit in browser: `https://n8n.elgenix.com`
+## 4) Common failure points (with quick diagnosis)
+### Problem: Site opens but n8n UI freezes / doesn’t update executions
 
-**Expected:**
-- Green padlock in browser
-- n8n login screen
+Cause: websockets not enabled in proxy context
+✅ Fix: Ensure proxy context has WebSocket ON
 
+Check logs:
+```bash
+tail -n 80 /usr/local/lsws/logs/error.log
+docker compose logs -n 80 n8n
+```
+
+### Problem: Login loop / keeps asking to login
+
+Cause: missing secure cookie behind HTTPS proxy
+✅ Fix: set:
+
+- N8N_SECURE_COOKIE=true
+- N8N_PROXY_HOPS=1
+
+Restart container.
+
+### Problem: Webhooks generate wrong URL
+
+Cause: wrong WEBHOOK_URL and N8N_EDITOR_BASE_URL
+✅ Fix: must match your public domain exactly.
+
+Problem: Can’t access at all (timeout)
+
+Checklist:
+```bash
+docker compose ps
+curl -I http://127.0.0.1:5678
+nslookup n8n.elgenix.com
+curl -I https://n8n.elgenix.com
+```
+
+
+- If local curl fails → n8n container issue
+- If DNS wrong → Namecheap record issue
+- If HTTPS returns CyberPanel default → proxy not set / not saved / OLS not restarted
+
+
+### WhatsApp webhook verification (correct approach in n8n)
+
+Your old doc used a Function node returning JSON. Meta expects a raw challenge response.
+
+✅ Correct n8n flow:
+
+1) Webhook node (GET or POST depending on Meta setup)
+2) IF verify token matches
+3) Respond to Webhook node → respond with hub.challenge as plain text
+
+Comment: This is the #1 reason WhatsApp verification fails.
+
+## Backup & Restore (the part you’ll actually use)
+Backup n8n data
+```bash
+tar -czf ~/n8n-backup-$(date +%Y%m%d-%H%M).tar.gz ~/.n8n
+ls -lh ~/n8n-backup-*.tar.gz
+```
+
+Restore
+```bash
+docker compose down
+rm -rf ~/.n8n
+tar -xzf ~/n8n-backup-YYYYMMDD-HHMM.tar.gz -C ~/
+docker compose up -d
+```
+
+### Minimal “health check” command set (copy/paste)
+```bash
+cd ~/n8n-docker
+docker compose ps
+docker compose logs -n 50 n8n
+curl -I http://127.0.0.1:5678
+curl -I https://n8n.elgenix.com
+tail -n 50 /usr/local/lsws/logs/error.log
+```
+
+### factory resetting n8n 
+If you previously created ~/.n8n with root, permission fix is enough.
+If something is badly corrupted, you can reset (⚠️ deletes workflows):
+```bash
+docker-compose down
+mv ~/.n8n ~/.n8n.bak-$(date +%Y%m%d-%H%M)
+mkdir -p ~/.n8n
+chown -R 1000:1000 ~/.n8n
+docker-compose up -d
+```
 ---
 
 ## 10. First Login & Configuration
