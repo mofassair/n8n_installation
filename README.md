@@ -31,7 +31,13 @@ services:
       - ~/.n8n:/home/node/.n8n
 EOF
 
-# 4. Open firewall
+# 4. Open firewall (CyberPanel GUI or firewalld)
+sudo firewall-cmd --zone=public --permanent --add-port=5678/tcp
+sudo firewall-cmd --reload
+
+or 
+
+4. open filewall via command
 sudo ufw allow 5678/tcp
 
 # 5. Start n8n
@@ -535,12 +541,42 @@ services:
 
 #### Step 3: Open Firewall Port
 
-```bash
-# Allow port 5678 through firewall
-sudo ufw allow 5678/tcp
+**Method 1: CyberPanel GUI (Recommended - Easiest)**
 
-# Check firewall status
-sudo ufw status
+1. Login to CyberPanel: https://109.123.254.58:8090/
+2. Navigate to: Security -> Firewall
+3. Add new rule:
+
+  Rule Name:    n8n-port
+  Protocol:     TCP
+  Port:         5678
+  IP Address:   0.0.0.0  (this opens it for all IPs)
+
+4. Click: Add button
+5. Click: Reload button (to apply changes)
+
+Done! Port 5678 is now open.
+
+**Method 2: Command Line**
+CyberPanel uses firewalld. Here are the commands:
+
+```bash
+# Check if firewalld is running
+sudo systemctl status firewalld
+
+# Open port 5678
+sudo firewall-cmd --zone=public --permanent --add-port=5678/tcp
+
+# Reload firewall to apply changes
+sudo firewall-cmd --reload
+
+# Verify the port is open
+sudo firewall-cmd --list-ports
+```
+
+Expected output:
+```
+5678/tcp 8090/tcp 80/tcp 443/tcp ...
 ```
 
 #### Step 4: Start n8n
@@ -1572,13 +1608,15 @@ docker ps
 ```
 
 **Check 2: Is firewall blocking port 5678?**
-```bash
-sudo ufw status
+Use CyberPanel Firewall (GUI) or firewalld to allow port 5678.
 
-# Should show: 5678/tcp ALLOW
-# If not:
-sudo ufw allow 5678/tcp
-sudo ufw reload
+CyberPanel GUI: Security -> Firewall -> add TCP 5678 and reload.
+
+Command line (firewalld):
+```bash
+sudo firewall-cmd --zone=public --permanent --add-port=5678/tcp
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-ports
 ```
 
 **Check 3: Is VPS firewall/security group blocking?**
