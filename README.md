@@ -531,7 +531,11 @@ context / {
   type                    proxy
   handler                 n8nproxy
 
-  # WebSocket support (critical for n8n live UI updates)
+  requestHeaders  {
+    set X-Forwarded-Proto https
+    set X-Forwarded-Host n8n.elgenix.com
+  }
+
   rewrite  {
     enable                0
   }
