@@ -10,11 +10,11 @@ services:
 
     environment:
       # === PUBLIC URL SETTINGS (HTTPS) ===
-      - N8N_HOST=${N8N_HOST}
+      - N8N_HOST=n8n.elgenix.com
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://${N8N_HOST}/
-      - N8N_EDITOR_BASE_URL=https://${N8N_HOST}/
+      - WEBHOOK_URL=https://n8n.elgenix.com/
+      - N8N_EDITOR_BASE_URL=https://n8n.elgenix.com/
 
       # === REVERSE PROXY SETTINGS ===
       - N8N_PROXY_HOPS=1
