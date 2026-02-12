@@ -335,16 +335,16 @@ sudo apt update && sudo apt upgrade -y
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
-# 3. Add your user to docker group (optional, for non-root usage)
-sudo usermod -aG docker $USER
-
-# 4. Install Docker Compose
+# 3. Install Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
-# 5. Verify installation
+# 4. Verify installation
 docker --version
 docker-compose --version
+```
+
+**Note:** If you do not add a user to the `docker` group, run Docker commands with `sudo` (recommended on a single-user VPS).
 ```
 
 **Expected output:**
