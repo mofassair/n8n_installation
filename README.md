@@ -474,30 +474,24 @@ nano docker-compose.yml
 **Paste this simple configuration:**
 
 ```yaml
-version: "3.8"
-
 services:
   n8n:
     image: n8nio/n8n:latest
-    restart: always
-
-    # Expose directly to the internet (testing)
+    container_name: n8n
+    restart: unless-stopped
     ports:
       - "5678:5678"
-
     environment:
-      # For direct IP access
       - N8N_HOST=YOUR_VPS_IP
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://YOUR_VPS_IP:5678/
-
-      # Use your actual timezone
+      - N8N_EDITOR_BASE_URL=http://YOUR_VPS_IP:5678/
+      - N8N_SECURE_COOKIE=false
       - GENERIC_TIMEZONE=Europe/Berlin
-
     volumes:
-      # Persistent data
-      - ~/.n8n:/home/node/.n8n
+      - /root/.n8n:/home/node/.n8n
+
 
 ```
 
@@ -596,34 +590,24 @@ nano docker-compose.yml
 **Paste this production configuration:**
 
 ```yaml
-version: "3.8"
-
 services:
   n8n:
     image: n8nio/n8n:latest
-    restart: always
-
-    # Only local access (CyberPanel will proxy)
+    container_name: n8n
+    restart: unless-stopped
     ports:
       - "127.0.0.1:5678:5678"
-
     environment:
       - N8N_HOST=n8n.elgenix.com
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
-
-      # CRITICAL: correct public webhook/editor URLs
       - WEBHOOK_URL=https://n8n.elgenix.com/
       - N8N_EDITOR_BASE_URL=https://n8n.elgenix.com/
-
-      # CRITICAL behind reverse proxy
       - N8N_PROXY_HOPS=1
       - N8N_SECURE_COOKIE=true
-
       - GENERIC_TIMEZONE=Europe/Berlin
-
     volumes:
-      - ~/.n8n:/home/node/.n8n
+      - /root/.n8n:/home/node/.n8n
 
 ```
 
