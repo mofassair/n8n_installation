@@ -1,0 +1,29 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+
+    # Only local access; CyberPanel reverse proxy will expose it via 443
+    ports:
+      - "127.0.0.1:5678:5678"
+
+    environment:
+      # === PUBLIC URL SETTINGS (HTTPS) ===
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${N8N_HOST}/
+      - N8N_EDITOR_BASE_URL=https://${N8N_HOST}/
+
+      # === REVERSE PROXY SETTINGS ===
+      - N8N_PROXY_HOPS=1
+
+      # === SECURITY / COOKIES ===
+      - N8N_SECURE_COOKIE=true
+
+      # === TIMEZONE ===
+      - GENERIC_TIMEZONE=Europe/Berlin
+
+    volumes:
+      - ${N8N_DATA_DIR}:/home/node/.n8n
