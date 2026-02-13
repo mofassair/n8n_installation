@@ -555,6 +555,7 @@ extprocessor n8nproxy {
 context / {
   type                    proxy
   handler                 n8nproxy
+  enableWebSocket        1
 
   requestHeaders  {
     set X-Forwarded-Proto https
