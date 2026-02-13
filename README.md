@@ -24,7 +24,7 @@ N8N_PROTOCOL=https
 N8N_SECURE_COOKIE=true
 N8N_PROXY_HOPS=1
 correct public URLs set
-⚠️ You are currently fixing the last header issue
+- ⚠️ You are currently fixing the last header issue
 (X-Forwarded-Proto) to remove the secure-cookie warning
 
 
