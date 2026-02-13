@@ -1,9 +1,8 @@
 # Complete n8n Automation Setup Guide for elgenix.com
-**VPS with CyberPanel | Job Applications + WhatsApp Chatbot**
 
 ---
 ##Update: steps taken as of 20260213
-
+- n8n at https://n8n.elgenix.com/ live.
 - VPS is ready (Ubuntu, ~8 GB RAM, enough disk, running fine)
 - Docker is installed and working
 - Docker-Compose is installed and working
