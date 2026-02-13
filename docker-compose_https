@@ -18,6 +18,8 @@ services:
 
       # === REVERSE PROXY SETTINGS ===
       - N8N_PROXY_HOPS=1
+      - N8N_PUSH_BACKEND=sse
+
 
       # === SECURITY / COOKIES ===
       - N8N_SECURE_COOKIE=true
