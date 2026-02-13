@@ -2,6 +2,31 @@
 **VPS with CyberPanel | Job Applications + WhatsApp Chatbot**
 
 ---
+##Update: steps taken as of 20260213
+
+✅ VPS is ready (Ubuntu, ~8 GB RAM, enough disk, running fine)
+✅ Docker is installed and working
+✅ Docker-Compose is installed and working
+✅ n8n container starts correctly (no crash loop anymore)
+✅ The permission problem is fixed
+(/root/.n8n → owned by UID 1000 → no more EACCES error)
+✅ n8n database migrations completed successfully
+✅ n8n is reachable locally on the server
+(http://127.0.0.1:5678 works)
+✅ Sub-domain n8n.elgenix.com is created in DNS and points to your VPS
+✅ Website n8n.elgenix.com exists in CyberPanel
+✅ SSL certificate is installed for n8n.elgenix.com
+✅ OpenLiteSpeed reverse proxy is configured to forward
+/ → http://127.0.0.1:5678
+✅ WebSocket support is enabled in the proxy
+✅ n8n is configured for production (Path-B):
+N8N_PROTOCOL=https
+N8N_SECURE_COOKIE=true
+N8N_PROXY_HOPS=1
+correct public URLs set
+⚠️ You are currently fixing the last header issue
+(X-Forwarded-Proto) to remove the secure-cookie warning
+
 
 ---
 
