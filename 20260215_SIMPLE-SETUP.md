@@ -39,7 +39,7 @@ ssh root@109.123.254.58
 
 Edit LiteSpeed config:
 ```bash
-sudo nano /usr/local/lsws/conf/httpd_config.xml
+sudo nano /usr/local/lsws/conf/httpd_config.conf
 ```
 
 Scroll to the BOTTOM (before the closing `</httpServerConfig>` tag).
@@ -48,7 +48,7 @@ Add this BEFORE `</httpServerConfig>`:
 ```xml
   <extProcessor>
     <type>proxy</type>
-    <name>n8n_proxy</name>
+    <n>n8n_proxy</n>
     <address>http://127.0.0.1:5678</address>
     <maxConns>100</maxConns>
     <pcKeepAliveTimeout>60</pcKeepAliveTimeout>
