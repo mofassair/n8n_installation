@@ -126,10 +126,27 @@ docker-compose up -d
 
 # Check if running
 docker ps
+
+
 ```
 
 You should see n8n container running.
 
+if not,
+fix file permission as below#
+```bash
+# Stop the container first
+docker-compose down
+
+# Fix the permissions
+sudo chown -R 1000:1000 n8n_data n8n_local_data
+
+# Start again
+docker-compose up -d
+
+# Check logs
+docker logs n8n -f
+```
 ---
 
 ## Step 7: Access n8n (1 minute)
