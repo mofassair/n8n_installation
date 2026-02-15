@@ -69,27 +69,26 @@ Save: Ctrl+O, Enter, Ctrl+X
 2. Click "Manage" next to n8n.elgenix.com
 3. Click "vHost Conf"
 
-### Find the HTTP section (port 80):
-Look for: `<virtualHost *:80>`
-
-Add these lines INSIDE that section:
+### Add Rewrite Rules to This File:
+You already have a rewrite section, but it's empty. Replace this section:
 ```apache
-RewriteEngine On
-RewriteCond %{REQUEST_URI} !^/.well-known/acme-challenge/
-RewriteRule ^(.*)$ http://n8n_proxy/$1 [P,L]
+rewrite  {
+ enable                  1
+  autoLoadHtaccess        1
+}
 ```
 
-### Find the HTTPS section (port 443):
-Look for: `<virtualHost *:443>`
-
-Add these lines INSIDE that section (AFTER the SSL lines):
+Add these lines replacing the above section:
 ```apache
-RewriteEngine On
-RewriteRule ^(.*)$ http://n8n_proxy/$1 [P,L]
+rewrite  {
+  enable                  1
+  autoLoadHtaccess        1
+  rules                   <<<END_rules
+  RewriteCond %{REQUEST_URI} !^/.well-known/acme-challenge/
+  RewriteRule ^(.*)$ http://n8n_proxy/$1 [P,L]
+  END_rules
+}
 ```
-
-4. Click "Save Changes"
-
 ---
 
 ## Step 5: Restart LiteSpeed (1 minute)
