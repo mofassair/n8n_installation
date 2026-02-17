@@ -209,21 +209,35 @@ sudo systemctl restart lsws
 ---
 
 
-## Backup & RESTORE
+## Backup & Restore
+
+> **Recommended:** Keep at least 3 backup files (daily or weekly) on another server/cloud storage.
 
 ### Backup
 ```bash
-tar -czvf n8n_backup_$(date +%Y%m%d).tar.gz n8n_data
+cd ~/n8n
+mkdir -p backups
 
+tar -czvf backups/n8n_backup_$(date +%Y%m%d_%H%M).tar.gz n8n_data docker-compose.yml
 ```
+
 ### Restore
 
+> **Important:** Restoring will overwrite your current `n8n_data` folder.
+
 ```bash
+cd ~/n8n
+
 docker-compose down
-rm -rf n8n_data
-tar -xzvf backup.tar.gz
+mv n8n_data n8n_data_before_restore_$(date +%Y%m%d_%H%M)
+tar -xzvf backups/n8n_backup_YYYYMMDD_HHMM.tar.gz
 sudo chown -R 1000:1000 n8n_data
 docker-compose up -d
+```
+
+### Quick backup verification
+```bash
+tar -tzf backups/n8n_backup_YYYYMMDD_HHMM.tar.gz | head
 ```
 
 ---
@@ -251,16 +265,33 @@ curl https://n8n.elgenix.com/healthz
 
 ---
 
-## Fast deply from github (for developer only)
+## Fast deploy from GitHub (for developer only)
 
-Here the git will prepared such a way an developer may clone the git and run an sh file which shall do all the tasks. 
+This option is for developers who want to provision quickly from this repo.
 
-
+### One-command setup flow
 ```bash
+# 1) Clone the repository
+git clone https://github.com/mofassair/n8n_installation.git
+cd n8n_installation
 
+# 2) Review env values (domain, email, timezone, etc.)
+cp .env.example .env
+nano .env
 
-
+# 3) Run setup script (create folders, copy compose, start containers)
+chmod +x scripts/quick-deploy.sh
+./scripts/quick-deploy.sh
 ```
+
+### Suggested quick-deploy script behavior
+- Validate Docker and Docker Compose are installed.
+- Create `~/n8n` and required volumes (`n8n_data`, `n8n_local_data`).
+- Copy `docker-compose.yml` (and optional Caddy/Nginx configs if used).
+- Start services with `docker-compose up -d`.
+- Print health-check URLs and troubleshooting tips.
+
+> Keep this section marked **developer only** so non-technical users follow the safer manual steps above.
 
 ---
 
