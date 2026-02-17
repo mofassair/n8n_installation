@@ -1,6 +1,25 @@
 # CyberPanel Configuration for n8n - SIMPLE STEPS
 
-## Step 1: Add DNS on Namecheap (5 minutes)
+```bash
+Internet
+   │
+   ▼
+https://n8n.elgenix.com (443 SSL)
+   │
+   ▼
+OpenLiteSpeed / CyberPanel (Reverse Proxy)
+   │
+   ▼
+http://127.0.0.1:5678 (localhost only)
+   │
+   ▼
+Docker Container: n8nio/n8n
+   │
+   ├── n8n_data        → database, credentials, workflows
+   └── n8n_local_data  → files for automations
+```
+
+## Step 1: Add DNS on Namecheap
 
 1. Login to Namecheap
 2. Go to Domain List → Manage elgenix.com
@@ -16,7 +35,7 @@
 
 ---
 
-## Step 2: Create Website in CyberPanel (2 minutes)
+## Step 2: Create Website in CyberPanel
 
 1. Login to CyberPanel: https://109.123.254.58:8090
 2. Go to: Websites → Create Website
@@ -26,11 +45,10 @@
    - Package: Default
    - SSL: ✓ CHECK THIS BOX
 4. Click "Create Website"
-5. Wait 1 minute
 
 ---
 
-## Step 3: Add External Processor in LiteSpeed (3 minutes)
+## Step 3: Add External Processor in LiteSpeed
 
 SSH into your server:
 ```bash
@@ -115,10 +133,11 @@ mkdir n8n
 cd n8n
 
 # Upload the docker-compose.yml file here
-# (Use SCP, SFTP, or just create it with nano)
-
 nano docker-compose.yml
 # Paste the docker-compose.yml content
+#>>>> Docker compose file <<<<<<
+# https://github.com/mofassair/n8n_installation/docker-compose.yml
+
 # Save: Ctrl+O, Enter, Ctrl+X
 
 # Start n8n
@@ -132,18 +151,15 @@ docker ps
 
 You should see n8n container running.
 
-if not,
-fix file permission as below#
+## Permissions Fix (Important)
+
 ```bash
 # Stop the container first
 docker-compose down
-
 # Fix the permissions
 sudo chown -R 1000:1000 n8n_data n8n_local_data
-
 # Start again
 docker-compose up -d
-
 # Check logs
 docker logs n8n -f
 ```
@@ -188,6 +204,62 @@ sudo systemctl status lsws
 # Restart both
 docker-compose restart
 sudo systemctl restart lsws
+```
+
+---
+
+
+## Backup & RESTORE
+
+### Backup
+```bash
+tar -czvf n8n_backup_$(date +%Y%m%d).tar.gz n8n_data
+
+```
+### Restore
+
+```bash
+docker-compose down
+rm -rf n8n_data
+tar -xzvf backup.tar.gz
+sudo chown -R 1000:1000 n8n_data
+docker-compose up -d
+```
+
+---
+
+## update n8n
+
+```bash
+docker-compose down
+docker-compose pull
+docker-compose up -d
+```
+
+---
+
+## Health Checks
+
+### Local
+```bash
+curl http://127.0.0.1:5678/healthz
+```
+### Public
+```bash
+curl https://n8n.elgenix.com/healthz
+```
+
+---
+
+## Fast deply from github (for developer only)
+
+Here the git will prepared such a way an developer may clone the git and run an sh file which shall do all the tasks. 
+
+
+```bash
+
+
+
 ```
 
 ---
