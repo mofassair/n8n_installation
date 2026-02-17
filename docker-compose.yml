@@ -1,6 +1,6 @@
 services:
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:1.86.1
     container_name: n8n
     restart: unless-stopped
     ports:
@@ -11,22 +11,22 @@ services:
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
       - WEBHOOK_URL=https://n8n.elgenix.com/
-      
+
       # CRITICAL: Fixes "Connection Lost" error on CyberPanel
       - N8N_PUSH_BACKEND=sse
       - N8N_TRUST_PROXY=true
       - N8N_PROXY_HOPS=1
       - N8N_SKIP_WEBHOOK_ORIGIN_CHECK=true
-      
+
       # Timezone
       - GENERIC_TIMEZONE=Europe/Berlin
       - TZ=Europe/Berlin
-      
+
       # Database
       - DB_TYPE=sqlite
       - EXECUTIONS_DATA_SAVE_ON_ERROR=all
       - EXECUTIONS_DATA_SAVE_ON_SUCCESS=all
-      
+
     volumes:
       - ./n8n_data:/home/node/.n8n
       - ./n8n_local_data:/files
